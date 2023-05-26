@@ -1,1 +1,96 @@
-javascript:(function() {  var frame = document.createElement('div');  frame.style.position = 'fixed';  frame.style.top = '50px';  frame.style.left = '50px';  frame.style.width = '500px';  frame.style.height = '400px';  frame.style.border = '1px solid #ddd';%20%20frame.style.boxShadow%20=%20'0%202px%205px%20rgba(0,%200,%200,%200.3)';%20%20frame.style.zIndex%20=%20'9999';%20%20frame.style.background%20=%20'#fff';%20%20frame.style.resize%20=%20'both';%20%20frame.style.overflow%20=%20'auto';%20%20frame.style.fontFamily%20=%20'Arial,%20sans-serif';%20%20frame.style.userSelect%20=%20'none';%20%20var%20header%20=%20document.createElement('div');%20%20header.style.display%20=%20'flex';%20%20header.style.alignItems%20=%20'center';%20%20header.style.justifyContent%20=%20'space-between';%20%20header.style.padding%20=%20'8px%2012px';%20%20header.style.background%20=%20'#f1f1f1';%20%20header.style.cursor%20=%20'move';%20%20var%20title%20=%20document.createElement('span');%20%20title.textContent%20=%20'Noowai';%20%20title.style.fontWeight%20=%20'bold';%20%20var%20closeButton%20=%20document.createElement('button');%20%20closeButton.textContent%20=%20'Close';%20%20closeButton.style.padding%20=%20'4px%208px';%20%20closeButton.style.border%20=%20'none';%20%20closeButton.style.background%20=%20'#ccc';%20%20closeButton.style.color%20=%20'#fff';%20%20closeButton.style.cursor%20=%20'pointer';%20%20closeButton.addEventListener('click',%20function()%20{%20%20%20%20document.body.removeChild(frame);%20%20});%20%20header.appendChild(title);%20%20header.appendChild(closeButton);%20%20var%20isDragging%20=%20false;%20%20var%20startPosX;%20%20var%20startPosY;%20%20var%20startOffsetLeft;%20%20var%20startOffsetTop;%20%20header.addEventListener('mousedown',%20startDragging);%20%20function%20startDragging(event)%20{%20%20%20%20isDragging%20=%20true;%20%20%20%20startPosX%20=%20event.clientX;%20%20%20%20startPosY%20=%20event.clientY;%20%20%20%20startOffsetLeft%20=%20frame.offsetLeft;%20%20%20%20startOffsetTop%20=%20frame.offsetTop;%20%20%20%20document.addEventListener('mousemove',%20drag);%20%20%20%20document.addEventListener('mouseup',%20stopDragging);%20%20}%20%20function%20drag(event)%20{%20%20%20%20if%20(!isDragging)%20return;%20%20%20%20var%20dx%20=%20event.clientX%20-%20startPosX;%20%20%20%20var%20dy%20=%20event.clientY%20-%20startPosY;%20%20%20%20frame.style.left%20=%20startOffsetLeft%20+%20dx%20+%20'px';%20%20%20%20frame.style.top%20=%20startOffsetTop%20+%20dy%20+%20'px';%20%20}%20%20function%20stopDragging()%20{%20%20%20%20isDragging%20=%20false;%20%20%20%20document.removeEventListener('mousemove',%20drag);%20%20%20%20document.removeEventListener('mouseup',%20stopDragging);%20%20}%20%20frame.appendChild(header);%20%20var%20iframe%20=%20document.createElement('iframe');%20%20iframe.src%20=%20'https://www.noowai.com';%20%20iframe.style.width%20=%20'100%';%20%20iframe.style.height%20=%20'calc(100%%20-%2032px)';%20%20iframe.style.border%20=%20'none';%20%20frame.appendChild(iframe);%20%20document.body.appendChild(frame);%20%20document.addEventListener('keydown',%20function(event)%20{%20%20%20%20if%20(event.key%20===%20'Escape')%20{%20%20%20%20%20%20document.body.removeChild(frame);%20%20%20%20}%20%20});})();
+javascript:(function() {
+  var frame = document.createElement('div');
+  frame.style.position = 'fixed';
+  frame.style.top = '50px';
+  frame.style.left = '50px';
+  frame.style.width = '500px';
+  frame.style.height = '400px';
+  frame.style.border = '1px solid #ddd';
+  frame.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+  frame.style.zIndex = '9999';
+  frame.style.background = '#fff';
+  frame.style.resize = 'both';
+  frame.style.overflow = 'auto';
+  frame.style.fontFamily = 'Arial, sans-serif';
+  frame.style.userSelect = 'none';
+
+  var header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.alignItems = 'center';
+  header.style.justifyContent = 'space-between';
+  header.style.padding = '8px 12px';
+  header.style.background = '#f1f1f1';
+  header.style.cursor = 'move';
+
+  var title = document.createElement('span');
+  title.textContent = 'Noowai';
+  title.style.fontWeight = 'bold';
+
+  var closeButton = document.createElement('button');
+  closeButton.textContent = 'Close';
+  closeButton.style.padding = '4px 8px';
+  closeButton.style.border = 'none';
+  closeButton.style.background = '#ccc';
+  closeButton.style.color = '#fff';
+  closeButton.style.cursor = 'pointer';
+
+  closeButton.addEventListener('click', function() {
+    document.body.removeChild(frame);
+  });
+
+  header.appendChild(title);
+  header.appendChild(closeButton);
+
+  var isDragging = false;
+  var startPosX;
+  var startPosY;
+  var startOffsetLeft;
+  var startOffsetTop;
+
+  header.addEventListener('mousedown', startDragging);
+
+  function startDragging(event) {
+    isDragging = true;
+    startPosX = event.clientX;
+    startPosY = event.clientY;
+    startOffsetLeft = frame.offsetLeft;
+    startOffsetTop = frame.offsetTop;
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDragging);
+  }
+
+  function drag(event) {
+    if (!isDragging) return;
+
+    var dx = event.clientX - startPosX;
+    var dy = event.clientY - startPosY;
+
+    frame.style.left = startOffsetLeft + dx + 'px';
+    frame.style.top = startOffsetTop + dy + 'px';
+  }
+
+  function stopDragging() {
+    isDragging = false;
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', stopDragging);
+  }
+
+  frame.appendChild(header);
+
+  var iframe = document.createElement('iframe');
+  iframe.src = 'https://www.noowai.com';
+  iframe.style.width = '100%';
+  iframe.style.height = 'calc(100% - 32px)';
+  iframe.style.border = 'none';
+
+  frame.appendChild(iframe);
+
+  document.body.appendChild(frame);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      document.body.removeChild(frame);
+    }
+  });
+})();
