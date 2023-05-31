@@ -8,19 +8,23 @@ javascript:(function() {
   frame.style.border = '1px solid #ddd';
   frame.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
   frame.style.zIndex = '9999';
-  frame.style.background = '#fff';
-  frame.style.fontFamily = 'Arial, sans-serif';
+  frame.style.background = '#000';
+  frame.style.color = '#fff';
+  frame.style.fontFamily = 'monospace';
   frame.style.userSelect = 'none';
-  frame.style.resize = 'both';
-  frame.style.overflow = 'auto';
+  frame.style.overflow = 'hidden';
+
+  var isDragging = false;
+  var dragStartX = 0;
+  var dragStartY = 0;
 
   var header = document.createElement('div');
   header.style.display = 'flex';
   header.style.alignItems = 'center';
   header.style.justifyContent = 'space-between';
   header.style.padding = '8px 12px';
-  header.style.background = '#f1f1f1';
-  header.style.cursor = 'move';
+  header.style.background = '#333';
+  header.style.userSelect = 'none';
 
   var title = document.createElement('span');
   title.textContent = 'Noowai Calculator';
@@ -30,64 +34,15 @@ javascript:(function() {
   closeButton.textContent = 'Close';
   closeButton.style.padding = '4px 8px';
   closeButton.style.border = 'none';
-  closeButton.style.background = '#ccc';
+  closeButton.style.background = 'red';
   closeButton.style.color = '#fff';
   closeButton.style.cursor = 'pointer';
-
   closeButton.addEventListener('click', function() {
-    document.body.removeChild(frame);
+    frame.style.display = 'none';
   });
 
   header.appendChild(title);
   header.appendChild(closeButton);
-
-  var isDragging = false;
-  var startPosX;
-  var startPosY;
-  var startOffsetLeft;
-  var startOffsetTop;
-
-  header.addEventListener('mousedown', startDragging);
-
-  function startDragging(event) {
-    isDragging = true;
-    startPosX = event.clientX;
-    startPosY = event.clientY;
-    startOffsetLeft = frame.offsetLeft;
-    startOffsetTop = frame.offsetTop;
-
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', stopDragging);
-  }
-
-  function drag(event) {
-    if (!isDragging) return;
-
-    var dx = event.clientX - startPosX;
-    var dy = event.clientY - startPosY;
-
-    frame.style.left = startOffsetLeft + dx + 'px';
-    frame.style.top = startOffsetTop + dy + 'px';
-  }
-
-  function stopDragging() {
-    isDragging = false;
-    document.removeEventListener('mousemove', drag);
-    document.removeEventListener('mouseup', stopDragging);
-  }
-
-  frame.appendChild(header);
-
-  var display = document.createElement('input');
-  display.type = 'text';
-  display.style.width = 'calc(100% - 24px)';
-  display.style.marginBottom = '8px';
-  display.style.padding = '4px';
-  display.style.fontSize = '18px';
-  display.style.border = '1px solid #ddd';
-  display.style.textAlign = 'right';
-
-  frame.appendChild(display);
 
   var calculator = document.createElement('div');
   calculator.style.padding = '12px';
@@ -95,43 +50,55 @@ javascript:(function() {
   calculator.style.height = 'calc(100% - 48px)';
   calculator.style.overflow = 'auto';
 
+  var display = document.createElement('input');
+  display.type = 'text';
+  display.style.width = '100%';
+  display.style.marginBottom = '8px';
+  display.style.padding = '4px';
+  display.style.fontSize = '24px';
+  display.style.border = 'none';
+  display.style.background = 'yellow';
+  display.style.textAlign = 'right';
+  display.style.fontFamily = 'monospace';
+
+  calculator.appendChild(display);
+
   var buttons = document.createElement('div');
   buttons.style.display = 'grid';
-  buttons.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  buttons.style.gridTemplateColumns = 'repeat(4, 1fr)';
   buttons.style.gridGap = '8px';
 
-  var clearButton = createButton('C', clearResult);
-  var numberButtons = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0'];
-  var operatorButtons = ['+', '-', '*', '/'];
-  var equalsButton = createButton('=', evaluateResult);
+  var buttonData = [
+    { text: '7', action: 'append' },
+    { text: '8', action: 'append' },
+    { text: '9', action: 'append' },
+    { text: '+', action: 'append' },
+    { text: '4', action: 'append' },
+    { text: '5', action: 'append' },
+    { text: '6', action: 'append' },
+    { text: '-', action: 'append' },
+    { text: '1', action: 'append' },
+    { text: '2', action: 'append' },
+    { text: '3', action: 'append' },
+    { text: '*', action: 'append' },
+    { text: 'C', action: 'clear' },
+    { text: '0', action: 'append' },
+    { text: '=', action: 'evaluate' },
+    { text: '/', action: 'append' }
+  ];
 
-  buttons.appendChild(clearButton);
-
-  var numberRow = document.createElement('div');
-  numberRow.style.display = 'grid';
-  numberRow.style.gridTemplateColumns = 'repeat(3, 1fr)';
-  numberRow.style.gridGap = '8px';
-
-  var operatorRow = document.createElement('div');
-  operatorRow.style.display = 'grid';
-  operatorRow.style.gridTemplateColumns = 'repeat(3, 1fr)';
-  operatorRow.style.gridGap = '8px';
-
-  numberButtons.forEach(function(number) {
-    numberRow.appendChild(createButton(number, function() {
-      display.value += number;
-    }));
+  buttonData.forEach(function(button) {
+    var calcButton = createButton(button.text, function() {
+      if (button.action === 'append') {
+        display.value += button.text;
+      } else if (button.action === 'clear') {
+        clearResult();
+      } else if (button.action === 'evaluate') {
+        evaluateResult();
+      }
+    });
+    buttons.appendChild(calcButton);
   });
-
-  operatorButtons.forEach(function(operator) {
-    operatorRow.appendChild(createButton(operator, function() {
-      display.value += operator;
-    }));
-  });
-
-  buttons.appendChild(numberRow);
-  buttons.appendChild(operatorRow);
-  buttons.appendChild(equalsButton);
 
   calculator.appendChild(buttons);
 
@@ -139,8 +106,12 @@ javascript:(function() {
     var button = document.createElement('button');
     button.textContent = text;
     button.style.padding = '8px';
-    button.style.fontSize = '16px';
+    button.style.fontSize = '18px';
     button.style.cursor = 'pointer';
+    button.style.border = 'none';
+    button.style.background = 'green';
+    button.style.color = '#fff';
+    button.style.borderRadius = '5px';
     button.addEventListener('click', clickHandler);
     return button;
   }
@@ -162,7 +133,57 @@ javascript:(function() {
     }
   }
 
+  frame.appendChild(header);
   frame.appendChild(calculator);
+
+  var resizeHandle = document.createElement('div');
+  resizeHandle.style.position = 'absolute';
+  resizeHandle.style.width = '10px';
+  resizeHandle.style.height = '10px';
+  resizeHandle.style.bottom = '0';
+  resizeHandle.style.right = '0';
+  resizeHandle.style.cursor = 'se-resize';
+  resizeHandle.style.borderBottom = '2px solid #ddd';
+  resizeHandle.style.borderRight = '2px solid #ddd';
+
+  resizeHandle.addEventListener('mousedown', function(event) {
+    event.preventDefault();
+    isResizing = true;
+    resizeStartX = event.clientX;
+    resizeStartY = event.clientY;
+    startWidth = parseInt(getComputedStyle(frame).width, 10);
+    startHeight = parseInt(getComputedStyle(frame).height, 10);
+  });
+
+  document.addEventListener('mousemove', function(event) {
+    if (isResizing) {
+      var newWidth = startWidth + event.clientX - resizeStartX;
+      var newHeight = startHeight + event.clientY - resizeStartY;
+      frame.style.width = newWidth + 'px';
+      frame.style.height = newHeight + 'px';
+    } else if (isDragging) {
+      var offsetX = event.clientX - dragStartX;
+      var offsetY = event.clientY - dragStartY;
+      frame.style.top = frame.offsetTop + offsetY + 'px';
+      frame.style.left = frame.offsetLeft + offsetX + 'px';
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+    }
+  });
+
+  document.addEventListener('mouseup', function() {
+    isResizing = false;
+    isDragging = false;
+  });
+
+  header.addEventListener('mousedown', function(event) {
+    event.preventDefault();
+    isDragging = true;
+    dragStartX = event.clientX;
+    dragStartY = event.clientY;
+  });
+
+  frame.appendChild(resizeHandle);
 
   var iframe = document.createElement('iframe');
   iframe.src = 'https://www.noowai.com';
@@ -172,14 +193,16 @@ javascript:(function() {
   iframe.style.display = 'none';
 
   frame.appendChild(iframe);
-
   document.body.appendChild(frame);
 
-
   display.addEventListener('keyup', function(event) {
-    if (display.value === '7913') {
+    if (event.key === 'Enter' && display.value === '7913') {
       iframe.style.display = 'block';
       calculator.style.display = 'none';
     }
+  });
+
+  iframe.addEventListener('load', function() {
+    iframe.contentWindow.document.body.style.overflow = 'hidden';
   });
 })();
